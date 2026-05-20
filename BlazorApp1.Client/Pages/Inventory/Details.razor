@@ -1,0 +1,53 @@
+@page "/inventory/{Id:int}"
+@rendermode InteractiveServer
+@using System.Net.Http.Json
+
+@* Details uses InteractiveServer because the detail page is data-driven and can benefit from centralized server rendering.
+   This mode keeps the browser payload smaller and keeps updates consistent with server-side state for inventory lookup. *@
+
+<InventorySection Title="Inventory Item Details (Client)">
+    <Actions>
+        <a class="btn btn-secondary" href="/inventory">Back to List</a>
+    </Actions>
+    <ChildContent>
+        @if (item is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@item.Name</dd>
+            <dt class="col-sm-2">Quantity</dt>
+            <dd class="col-sm-10">@item.Quantity</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@item.Description</dd>
+        </dl>
+        <button class="btn btn-secondary me-2" @onclick="() => EditItem(item.Id)">Edit</button>
+    }
+    </ChildContent>
+</InventorySection>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private InventoryItem? item;
+
+    [Inject]
+    private HttpClient Http { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        item = await Http.GetFromJsonAsync<InventoryItem>($"api/inventory/{Id}");
+    }
+
+    private void EditItem(int id)
+    {
+        NavigationManager.NavigateTo($"/inventory/edit/{id}");
+    }
+}

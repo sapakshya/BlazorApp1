@@ -1,0 +1,56 @@
+@page "/admin/users"
+
+@using BlazorApp1.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+
+<h3>Pending User Approvals</h3>
+
+@if (users is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!users.Any())
+{
+    <p>No users awaiting approval.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>Email</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var u in users)
+            {
+                <tr>
+                    <td>@u.Email</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" @onclick="() => Approve(u.Id)">Approve</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ApplicationUser>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // List users that are not yet approved
+        users = await UserManager.Users.Where(u => !u.IsApproved).ToListAsync();
+    }
+
+    private async Task Approve(string id)
+    {
+        var u = await UserManager.FindByIdAsync(id);
+        if (u is null) return;
+        u.IsApproved = true;
+        await UserManager.UpdateAsync(u);
+        users = await UserManager.Users.Where(x => !x.IsApproved).ToListAsync();
+        StateHasChanged();
+    }
+}

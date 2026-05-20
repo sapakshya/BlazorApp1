@@ -1,0 +1,50 @@
+@page "/inventory/edit/{Id:int}"
+
+@using BlazorApp1.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext Db
+@inject NavigationManager Nav
+
+<h3>Edit Inventory Item</h3>
+
+@if (item is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="item" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <InputText @bind-Value="item.Name" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <InputNumber @bind-Value="item.Quantity" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <InputTextArea @bind-Value="item.Description" class="form-control" />
+        </div>
+        <button class="btn btn-primary">Save</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private InventoryItem? item;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        item = await Db.InventoryItems!.FindAsync(Id);
+    }
+
+    private async Task Save()
+    {
+        if (item is null) return;
+        Db.InventoryItems!.Update(item);
+        await Db.SaveChangesAsync();
+        Nav.NavigateTo($"/inventory/{item.Id}");
+    }
+}

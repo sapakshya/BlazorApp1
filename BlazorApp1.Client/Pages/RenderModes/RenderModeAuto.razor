@@ -1,0 +1,24 @@
+@page "/render/auto"
+@rendermode InteractiveAuto
+
+<PageTitle>InteractiveAuto Render Mode</PageTitle>
+
+<h1>InteractiveAuto Render Mode</h1>
+
+<p>
+    This page uses <code>@@rendermode InteractiveAuto</code>. The host chooses the best execution environment,
+    either server interactive or WebAssembly interactive, based on runtime support.
+</p>
+
+<p>
+    <strong>Why this mode is chosen:</strong>
+    Use <code>InteractiveAuto</code> when you want the framework to select the most appropriate interactive mode for the current host.
+    It is the best default for components that require interactivity but should remain flexible across deployment models.
+</p>
+
+<p>
+    <strong>Best cases:</strong>
+    page demos, mixed-host applications, and scenarios where you want a single component to work in both server and WASM hosts without changing markup.
+</p>
+
+<RenderModeSample />

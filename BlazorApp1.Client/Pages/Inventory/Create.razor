@@ -1,0 +1,48 @@
+@page "/inventory/create"
+@rendermode InteractiveWebAssembly
+@using System.Net.Http.Json
+
+@* Create uses InteractiveWebAssembly because this page is form-heavy and benefits from local responsiveness.
+   WebAssembly is the best choice for user-driven inventory entry and validation when the client can handle form state
+   in the browser with reduced round trips after the initial download. *@
+
+<InventorySection Title="Create Inventory Item (Client)">
+    <Actions>
+        <a class="btn btn-secondary" href="/inventory">Back to List</a>
+    </Actions>
+    <ChildContent>
+        <EditForm Model="item" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <InputText @bind-Value="item.Name" class="form-control" placeholder="Name" />
+        </div>
+        <div class="mb-3">
+            <InputNumber @bind-Value="item.Quantity" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <InputTextArea @bind-Value="item.Description" class="form-control" />
+        </div>
+        <button class="btn btn-primary">Save</button>
+    </EditForm>
+    </ChildContent>
+</InventorySection>
+
+@code {
+    private InventoryItem item = new();
+
+    [Inject]
+    private HttpClient Http { get; set; } = default!;
+
+    private async Task Save()
+    {
+        var res = await Http.PostAsJsonAsync("api/inventory", item);
+        if (res.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/inventory");
+        }
+    }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+}

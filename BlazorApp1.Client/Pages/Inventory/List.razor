@@ -1,0 +1,166 @@
+@page "/inventory"
+@rendermode InteractiveAuto
+@using System.Linq
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+
+@* InteractiveAuto is chosen for the inventory list page because it lets the host pick the best interactive runtime.
+   This is ideal for a data-driven list where the page can run on the server or in WebAssembly depending on deployment,
+   while still delivering instant client-side filtering and selection behavior when available. *@
+
+<div class="inventory-section mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3>Inventory (Client)</h3>
+        <p>
+            InteractiveAuto is chosen for the inventory list page because it lets the host pick the best interactive runtime.
+            This is ideal for a data-driven list where the page can run on the server or in WebAssembly depending on deployment,
+            while still delivering instant client-side filtering and selection behavior when available.
+        </p>
+        <a class="btn btn-primary" href="/inventory/create">Create New Item</a>
+    </div>
+
+    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+        <input class="form-control flex-grow-1"
+               placeholder="Search inventory by name..."
+               @bind="searchTerm"
+               @bind:event="oninput"
+               aria-label="Search inventory"
+               title="Live search as you type" />
+        <button class="btn btn-outline-secondary" @onclick="ClearSearch" hidden="@(string.IsNullOrWhiteSpace(searchTerm))">
+            Clear
+        </button>
+        <button class="btn btn-outline-secondary" @onclick="ToggleLowStockFilter">
+            @(showLowStockOnly ? "Show All" : "Show Low Stock")
+        </button>
+        <span class="badge bg-info">Low stock threshold: @lowStockThreshold</span>
+    </div>
+    <div class="text-muted small mb-3">
+        @if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            <span>Live filtering inventory for "<strong>@searchTerm</strong>".</span>
+        }
+        else
+        {
+            <span>Type to search inventory by name instantly.</span>
+        }
+    </div>
+
+    @if (items is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+
+    @if (items is not null && !FilteredItems.Any())
+    {
+        <p>No items match your filter.</p>
+    }
+
+    @if (items is not null && FilteredItems.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr><th>Name</th><th>Qty</th><th></th></tr>
+            </thead>
+            <tbody>
+                @Rows
+            </tbody>
+        </table>
+    }
+
+    <InventoryItemDetails SelectedItem="@selectedItem">
+    </InventoryItemDetails>
+</div>
+
+@code {
+    private readonly int lowStockThreshold = 5;
+    private List<InventoryItem>? items;
+    private InventoryItem? selectedItem;
+    private string searchTerm = string.Empty;
+    private bool showLowStockOnly;
+
+    [Inject]
+    private HttpClient Http { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Http.GetFromJsonAsync<List<InventoryItem>>("api/inventory");
+    }
+
+    private string SearchTerm => string.IsNullOrWhiteSpace(searchTerm) ? string.Empty : searchTerm.Trim();
+
+    private IEnumerable<InventoryItem> FilteredItems => items?
+        .Where(i => string.IsNullOrWhiteSpace(SearchTerm) || i.Name.Trim().Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+        .Where(i => !showLowStockOnly || i.Quantity <= lowStockThreshold)
+        .OrderBy(i => i.Name)
+        ?? Enumerable.Empty<InventoryItem>();
+
+    private void ToggleLowStockFilter()
+    {
+        showLowStockOnly = !showLowStockOnly;
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+    }
+
+    private RenderFragment Rows => builder =>
+    {
+        if (FilteredItems is null)
+        {
+            return;
+        }
+
+        var seq = 0;
+        foreach (var it in FilteredItems)
+        {
+            builder.OpenComponent<InventoryItemRow>(seq++);
+            builder.AddAttribute(seq++, "Item", it);
+            builder.AddAttribute(seq++, "IsSelected", selectedItem?.Id == it.Id);
+            builder.AddAttribute(seq++, "OnSelect", EventCallback.Factory.Create<InventoryItem>(this, SelectItem));
+            builder.AddAttribute(seq++, "OnEdit", EventCallback.Factory.Create<InventoryItem>(this, EditItem));
+            builder.AddAttribute(seq++, "OnDelete", EventCallback.Factory.Create<InventoryItem>(this, DeleteItem));
+            builder.AddAttribute(seq++, "OnRestock", EventCallback.Factory.Create<InventoryItem>(this, RestockItem));
+            builder.CloseComponent();
+        }
+    };
+
+    
+
+    private async Task SelectItem(InventoryItem item)
+    {
+        selectedItem = item;
+    }
+
+    private Task EditItem(InventoryItem item)
+    {
+        NavigationManager.NavigateTo($"/inventory/edit/{item.Id}");
+        return Task.CompletedTask;
+    }
+
+    private async Task DeleteItem(InventoryItem item)
+    {
+        var response = await Http.DeleteAsync($"api/inventory/{item.Id}");
+        if (response.IsSuccessStatusCode)
+        {
+            items = items?.Where(i => i.Id != item.Id).ToList();
+            if (selectedItem?.Id == item.Id)
+            {
+                selectedItem = null;
+            }
+        }
+    }
+
+    private async Task RestockItem(InventoryItem item)
+    {
+        item.Quantity = lowStockThreshold * 4;
+        var response = await Http.PutAsJsonAsync($"api/inventory/{item.Id}", item);
+        if (response.IsSuccessStatusCode)
+        {
+            items = items?.Select(i => i.Id == item.Id ? item : i).ToList();
+        }
+    }
+}

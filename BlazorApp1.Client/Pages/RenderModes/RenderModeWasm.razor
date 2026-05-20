@@ -1,0 +1,24 @@
+@page "/render/wasm"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>InteractiveWebAssembly Render Mode</PageTitle>
+
+<h1>InteractiveWebAssembly Render Mode</h1>
+
+<p>
+    This page uses <code>@@rendermode InteractiveWebAssembly</code>. The component is loaded as a WebAssembly app in the browser
+    and runs entirely on the client after initial download.
+</p>
+
+<p>
+    <strong>Why this mode is chosen:</strong>
+    Choose <code>InteractiveWebAssembly</code> when you need client-side performance, offline capability, or reduced server load after the app is downloaded.
+    It is the best choice for feature-rich client experiences and apps that must remain responsive without constant server interaction.
+</p>
+
+<p>
+    <strong>Best cases:</strong>
+    line-of-business apps with heavy UI interactions, offline-enabled workflows, and apps deployed to edge locations where client execution is preferred.
+</p>
+
+<RenderModeSample />

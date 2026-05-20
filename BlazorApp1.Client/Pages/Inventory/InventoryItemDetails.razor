@@ -1,0 +1,38 @@
+@using BlazorApp1.Client
+
+<div class="card mt-4">
+    <div class="card-header">
+        Selected Item Details
+    </div>
+    <div class="card-body">
+        @if (SelectedItem is null)
+        {
+            <p class="mb-0">No item selected. Click an item name to view details.</p>
+        }
+        else
+        {
+            <dl class="row">
+                <dt class="col-sm-3">Name</dt>
+                <dd class="col-sm-9">@SelectedItem.Name</dd>
+                <dt class="col-sm-3">Quantity</dt>
+                <dd class="col-sm-9">
+                    @SelectedItem.Quantity
+                    <span class="badge @(SelectedItem.Quantity <= lowStockThreshold ? "bg-danger" : "bg-success") ms-2">
+                        @(SelectedItem.Quantity <= lowStockThreshold ? "Low stock" : "In stock")
+                    </span>
+                </dd>
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">@SelectedItem.Description</dd>
+                <dt class="col-sm-3">Created At</dt>
+                <dd class="col-sm-9">@SelectedItem.CreatedAt.ToLocalTime().ToString("g")</dd>
+            </dl>
+        }
+    </div>
+</div>
+
+@code {
+    private readonly int lowStockThreshold = 5;
+
+    [Parameter]
+    public InventoryItem? SelectedItem { get; set; }
+}

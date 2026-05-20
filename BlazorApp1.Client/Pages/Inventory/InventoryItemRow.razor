@@ -1,0 +1,59 @@
+@using BlazorApp1.Client
+
+<tr class="@(IsSelected ? "table-primary" : string.Empty)">
+    <td>
+        <button class="btn btn-link p-0" @onclick="SelectItem">@Item.Name</button>
+    </td>
+    <td>
+        @Item.Quantity
+        @if (Item.Quantity <= 5)
+        {
+            <span class="badge bg-danger ms-2">Low stock</span>
+        }
+    </td>
+    <td class="text-end">
+        <button class="btn btn-sm btn-outline-secondary me-2" @onclick="EditItem">Edit</button>
+        <button class="btn btn-sm btn-outline-success me-2" @onclick="RestockItem" disabled="@(Item.Quantity > 5)">Reorder</button>
+        <button class="btn btn-sm btn-outline-danger" @onclick="DeleteItem">Delete</button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public InventoryItem Item { get; set; } = default!;
+
+    [Parameter]
+    public bool IsSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<InventoryItem> OnSelect { get; set; }
+
+    [Parameter]
+    public EventCallback<InventoryItem> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<InventoryItem> OnDelete { get; set; }
+
+    [Parameter]
+    public EventCallback<InventoryItem> OnRestock { get; set; }
+
+    private async Task SelectItem()
+    {
+        await OnSelect.InvokeAsync(Item);
+    }
+
+    private async Task EditItem()
+    {
+        await OnEdit.InvokeAsync(Item);
+    }
+
+    private async Task RestockItem()
+    {
+        await OnRestock.InvokeAsync(Item);
+    }
+
+    private async Task DeleteItem()
+    {
+        await OnDelete.InvokeAsync(Item);
+    }
+}

@@ -1,0 +1,63 @@
+@page "/inventory/edit/{Id:int}"
+@rendermode InteractiveWebAssembly
+@using System.Net.Http.Json
+
+@* Edit is also rendered with InteractiveWebAssembly because editing inventory items is an interactive form scenario.
+   This provides instant client-side feedback and faster response once the browser has downloaded the runtime. *@
+
+<InventorySection Title="Edit Inventory Item (Client)">
+    <Actions>
+        <a class="btn btn-secondary" href="/inventory">Back to List</a>
+    </Actions>
+    <ChildContent>
+        @if (item is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <EditForm Model="item" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3">
+                <InputText @bind-Value="item.Name" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <InputNumber @bind-Value="item.Quantity" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <InputTextArea @bind-Value="item.Description" class="form-control" />
+            </div>
+            <button class="btn btn-primary">Save</button>
+        </EditForm>
+    }
+    </ChildContent>
+</InventorySection>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private InventoryItem? item;
+
+    [Inject]
+    private HttpClient Http { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        item = await Http.GetFromJsonAsync<InventoryItem>($"api/inventory/{Id}");
+    }
+
+    private async Task Save()
+    {
+        if (item == null) return;
+        var res = await Http.PutAsJsonAsync($"api/inventory/{item.Id}", item);
+        if (res.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo($"/inventory/{item.Id}");
+        }
+    }
+}

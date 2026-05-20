@@ -1,0 +1,33 @@
+@page "/render"
+
+<PageTitle>Render Modes</PageTitle>
+
+<h1>Blazor Render Modes</h1>
+
+<p>This page demonstrates the four supported render modes and links to each mode-specific demo.</p>
+
+<ul>
+    <li><a href="/render/auto">InteractiveAuto</a></li>
+    <li><a href="/render/server">InteractiveServer</a></li>
+    <li><a href="/render/wasm">InteractiveWebAssembly</a></li>
+</ul>
+
+<h2>Implementation locations</h2>
+<ul>
+    <li><strong>Server host registration:</strong> <code>BlazorApp1/Program.cs</code> configures `MapRazorComponents&lt;App&gt;()` and the supported render modes.</li>
+    <li><strong>Client mode pages:</strong> `BlazorApp1.Client/Pages/RenderModes/*.razor` each use `@@rendermode`.</li>
+    <li><strong>Shared sample component:</strong> `BlazorApp1.Client/Pages/RenderModes/RenderModeSample.razor` shows interactive behavior.</li>
+</ul>
+<p>
+    Note: In this .NET 10 app, the supported `@@rendermode` values are
+    <code>InteractiveAuto</code>, <code>InteractiveServer</code>, and <code>InteractiveWebAssembly</code>.
+</p>
+
+<p>Use these demo pages to compare how Blazor renders the same component under different render modes.</p>
+
+<h2>Inventory page mode choices</h2>
+<ul>
+    <li><strong>Inventory list:</strong> <code>InteractiveAuto</code> is chosen so the host can select the best interactive runtime and still provide responsive filtering and selection.</li>
+    <li><strong>Inventory details:</strong> <code>InteractiveServer</code> is chosen for fresh server-backed detail loading, smaller browser payload, and centralized state.</li>
+    <li><strong>Inventory create/edit:</strong> <code>InteractiveWebAssembly</code> is chosen for form-heavy user interaction and responsive client-side editing.</li>
+</ul>

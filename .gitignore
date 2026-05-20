@@ -1,0 +1,116 @@
+# Visual Studio / .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+.vscode/
+*.vscode/
+
+# Vibe Coding / VS Code workspace settings
+*.code-workspace
+
+*.tmp
+*.temp
+*.log
+*.vspscc
+*.vssscc
+
+# Build results
+[Bb]uild/
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Rider
+.idea/
+*.sln.iml
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET temporary files
+appsettings.Development.json
+appsettings.Local.json
+
+# Visual Studio cache files
+*.cache
+*.dbmdl
+*.bak
+*.backup
+*.rdl.data
+*.rptproj.user
+*.DeployParams.*
+
+# User-specific files
+*.psess
+*.vsp
+*.vspx
+
+# Visual Studio profiler
+*.vsp
+*.vsix
+
+# IIS Express
+/.vs/
+
+# Blazor / ASP.NET Core
+**/wwwroot/lib/
+clientapp/node_modules/
+
+# MSBuild
+*.idb
+*.pdb
+*.ipch
+*.aps
+*.pch
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.ipdb
+*.log
+*.tlog
+*.lastbuildstate
+*.vspscc
+*.vssscc
+
+# Database
+*.mdf
+*.ldf
+
+# DotCover
+*.dotCover
+
+# Azure DevOps
+.azuredevops/
+
+# Resharper
+_ReSharper*/
+*.ReSharper*
+
+# Entity Framework
+*.jfm
+
+# JetBrains
+.idea/
+*.sln.iml
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# End of .gitignore

@@ -1,0 +1,68 @@
+@page "/inventory"
+
+@using BlazorApp1.Data
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext Db
+@inject NavigationManager Nav
+
+<h3>Inventory Items</h3>
+
+<p>
+    <a class="btn btn-primary" href="/inventory/create">Create New Item</a>
+</p>
+
+<div class="mb-3">
+    <input class="form-control"
+           placeholder="Search inventory by name..."
+           @bind="searchTerm"
+           @bind:event="oninput"
+           aria-label="Search inventory" />
+</div>
+
+@if (items is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!FilteredItems.Any())
+{
+    <p>No items match your search.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr><th>Name</th><th>Qty</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var it in FilteredItems)
+            {
+                <tr>
+                    <td>@it.Name</td>
+                    <td>@it.Quantity</td>
+                    <td>
+                        <a class="btn btn-sm btn-link" href="/inventory/@it.Id">Details</a>
+                        <a class="btn btn-sm btn-secondary" href="/inventory/edit/@it.Id">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<InventoryItem>? items;
+    private string searchTerm = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Db.InventoryItems!.OrderBy(i => i.Name).ToListAsync();
+    }
+
+    private string SearchTerm => string.IsNullOrWhiteSpace(searchTerm) ? string.Empty : searchTerm.Trim();
+
+    private IEnumerable<InventoryItem> FilteredItems => items?
+        .Where(i => string.IsNullOrWhiteSpace(SearchTerm) || i.Name.Trim().Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+        .OrderBy(i => i.Name)
+        ?? Enumerable.Empty<InventoryItem>();
+}

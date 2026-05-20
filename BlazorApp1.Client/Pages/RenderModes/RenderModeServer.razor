@@ -1,0 +1,24 @@
+@page "/render/server"
+@rendermode InteractiveServer
+
+<PageTitle>InteractiveServer Render Mode</PageTitle>
+
+<h1>InteractiveServer Render Mode</h1>
+
+<p>
+    This page uses <code>@@rendermode InteractiveServer</code>. The UI is rendered on the server and remains interactive
+    via SignalR after initial render.
+</p>
+
+<p>
+    <strong>Why this mode is chosen:</strong>
+    Choose <code>InteractiveServer</code> when you want smaller client payloads, centralized state, and live server-driven rendering.
+    It is ideal when browser compatibility or server-side access to secure resources is more important than reducing round trips.
+</p>
+
+<p>
+    <strong>Best cases:</strong>
+    admin dashboards, internal business apps, and forms that require server-side validation or high security with minimal client download.
+</p>
+
+<RenderModeSample />

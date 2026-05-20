@@ -1,0 +1,28 @@
+@page "/render/static"
+
+<PageTitle>Static Render Mode Information</PageTitle>
+
+<h1>Static Render Mode Information</h1>
+
+<p>
+    This page explains how static render mode differs from the interactive render modes.
+    The current `@@rendermode` directive in .NET 10 supports <code>InteractiveAuto</code>,
+    <code>InteractiveServer</code>, and <code>InteractiveWebAssembly</code>.
+</p>
+
+<p>
+    Static render mode is not exposed as a `@@rendermode` directive value in this version of .NET.
+    Instead, static content is best represented by plain Razor pages or pre-rendered content that does not need client-side interactivity.
+</p>
+
+<p>
+    <strong>Why static-like rendering is chosen in some scenarios:</strong>
+    Static rendering is the best choice for pages that are primarily informational and do not require user interaction,
+    because it minimizes client-side dependencies and eliminates the need for JavaScript initialization.
+</p>
+
+<p>
+    <strong>Best cases:</strong>
+    marketing pages, documentation, landing pages, and any content-driven view where SEO, fast first paint, and low maintenance are more important than interactivity.
+</p>
+
