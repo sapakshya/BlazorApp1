@@ -1,0 +1,41 @@
+﻿@Inventory_HostAddress = https://localhost:7074
+
+### Get All Inventory Items
+GET {{Inventory_HostAddress}}/api/inventory
+Accept: application/json
+
+###
+
+### Get Inventory Item By Id
+GET {{Inventory_HostAddress}}/api/inventory/1
+Accept: application/json
+
+###
+
+### Create Inventory Item
+POST {{Inventory_HostAddress}}/api/inventory
+Content-Type: application/json
+
+{
+  "name": "PC",
+  "description": "lenovo Gaming PC",
+  "quantity": 5
+}
+
+###
+
+### Update Inventory Item
+PUT {{Inventory_HostAddress}}/api/inventory/1
+Content-Type: application/json
+{
+  "id": 1,
+  "name": "Updated Laptop",
+  "description": "Updated Dell Gaming Laptop",
+  "quantity": 10
+}
+
+###
+
+### Delete Inventory Item
+DELETE {{Inventory_HostAddress}}/api/inventory/1
+Accept: application/json
