@@ -1,5 +1,11 @@
 ﻿@page "/counter"
 @rendermode InteractiveAuto
+@using BlazorApp1.Client.Services
+@inject IGreetingService GreetingService
+@inject IUserSessionService UserSessionService
+@inject IAppInfoService AppInfoService
+@inject IServiceProvider ServiceProvider
+@inject IServiceScopeFactory ServiceScopeFactory
 
 <PageTitle>Counter</PageTitle>
 
@@ -7,13 +13,106 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary me-2" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-secondary me-2" @onclick="ResolveAnotherGreeting">Resolve new transient greeting</button>
+<button class="btn btn-info" @onclick="ResolveScopedInCurrentScope">Resolve another scoped instance in current scope</button>
+<button class="btn btn-warning mt-2" @onclick="ResolveScopedInNewScope">Resolve scoped instance in new child scope</button>
+
+<h2 class="mt-4">Service lifetime demo</h2>
+<div class="mb-3">
+    <strong>Transient service</strong> creates a new instance each time it is requested.
+</div>
+<ul>
+    <li>Injected transient instance: @GreetingService.InstanceId</li>
+    <li>Injected greeting text: @GreetingService.Greeting</li>
+    <li>New transient instance resolved on button click: @resolvedGreetingId</li>
+    <li>@(isTransientDifferent ? "Transient resolved instance is different from the injected instance." : "Transient resolved instance is the same, which should not happen.")</li>
+</ul>
+
+<div class="mb-3 mt-4">
+    <strong>Scoped service</strong> is shared within the same DI scope.
+</div>
+<ul>
+    <li>Injected scoped session instance: @UserSessionService.SessionId</li>
+    <li>Resolved scoped instance in current scope: @resolvedScopedId</li>
+    <li>@(isScopedShared ? "Scoped service is shared in the same scope." : "Scoped service is not shared in the same scope.")</li>
+    <li>Resolved scoped instance in a new child scope: @childScopeScopedId</li>
+    <li>@(isChildScopeDifferent ? "New child scope gets a different scoped instance." : "Child scope did not create a new scoped instance.")</li>
+</ul>
+
+<div class="mb-3 mt-4">
+    <strong>Singleton service</strong> uses the same instance for the lifetime of the app.
+</div>
+<ul>
+    <li>Injected singleton instance: @AppInfoService.InstanceId</li>
+    <li>Resolved singleton instance: @resolvedSingletonId</li>
+    <li>@(isSingletonSame ? "Singleton service reused the same instance." : "Singleton service returned a different instance.")</li>
+</ul>
+
+@if (!string.IsNullOrEmpty(additionalMessage))
+{
+    <div class="alert alert-secondary mt-3">@additionalMessage</div>
+}
 
 @code {
     private int currentCount = 0;
+    private string resolvedGreetingId = string.Empty;
+    private string resolvedScopedId = string.Empty;
+    private string childScopeScopedId = string.Empty;
+    private string resolvedSingletonId = string.Empty;
+    private bool isTransientDifferent;
+    private bool isScopedShared;
+    private bool isChildScopeDifferent;
+    private bool isSingletonSame;
+    private string additionalMessage = string.Empty;
 
     private void IncrementCount()
     {
         currentCount++;
+        UserSessionService.IncrementPageView();
+        additionalMessage = "Counter clicked and scoped session page view incremented.";
+    }
+
+    private void ResolveAnotherGreeting()
+    {
+        var transient = ServiceProvider.GetRequiredService<IGreetingService>();
+        resolvedGreetingId = transient.InstanceId.ToString();
+        isTransientDifferent = transient.InstanceId != GreetingService.InstanceId;
+        additionalMessage = isTransientDifferent
+            ? "A new transient instance was created for this request."
+            : "The transient instance was unexpectedly the same.";
+    }
+
+    private void ResolveScopedInCurrentScope()
+    {
+        var scoped = ServiceProvider.GetRequiredService<IUserSessionService>();
+        resolvedScopedId = scoped.SessionId.ToString();
+        isScopedShared = scoped.SessionId == UserSessionService.SessionId;
+        additionalMessage = isScopedShared
+            ? "The scoped instance is shared within the current scope."
+            : "The scoped instance is not shared within the current scope.";
+    }
+
+    private void ResolveScopedInNewScope()
+    {
+        using var scope = ServiceScopeFactory.CreateScope();
+        var scopedInNewScope = scope.ServiceProvider.GetRequiredService<IUserSessionService>();
+        childScopeScopedId = scopedInNewScope.SessionId.ToString();
+        isChildScopeDifferent = childScopeScopedId != UserSessionService.SessionId.ToString();
+        additionalMessage = isChildScopeDifferent
+            ? "A new child scope has a different scoped instance."
+            : "The scoped instance in the child scope is the same as the parent scope.";
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Resolve the singleton once and compare to the injected instance
+            var singleton = ServiceProvider.GetRequiredService<IAppInfoService>();
+            resolvedSingletonId = singleton.InstanceId.ToString();
+            isSingletonSame = singleton.InstanceId == AppInfoService.InstanceId;
+            additionalMessage = "Singleton instance resolved and verified on first render.";
+        }
     }
 }

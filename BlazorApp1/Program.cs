@@ -1,4 +1,5 @@
 using BlazorApp1.Client.Pages;
+using BlazorApp1.Client.Services;
 using BlazorApp1.Components;
 using BlazorApp1.Components.Account;
 using BlazorApp1.Data;
@@ -58,6 +59,12 @@ namespace BlazorApp1
                 .AddDefaultTokenProviders();
 
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+            // Register client-side demo services on the server DI container as well
+            // so server-side rendering/prerendering can resolve the same services used by components.
+            builder.Services.AddTransient<IGreetingService, GreetingService>();
+            builder.Services.AddScoped<IUserSessionService, UserSessionService>();
+            builder.Services.AddSingleton<IAppInfoService, AppInfoService>();
 
             var app = builder.Build();
 
